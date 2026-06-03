@@ -239,26 +239,37 @@ export default function MilitaryMap(props) {
   const [hC, setHC] = React.useState(null);
 
   const [transform, setTransform] = React.useState({ k: 1, x: 0, y: 0 });
+  const transformRef = React.useRef(transform);
+  React.useEffect(() => { transformRef.current = transform; }, [transform]);
+
   const [isPanning, setIsPanning] = React.useState(false);
 
   React.useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const onWheel = (e) => {
+      const prev = transformRef.current;
+      const isZoomingOut = e.deltaY > 0;
+      
+      // If we are at default zoom and trying to zoom out/scroll down, let the page scroll!
+      if (prev.k <= 1 && isZoomingOut) {
+        return; 
+      }
+      
+      // Otherwise intercept and zoom
       e.preventDefault();
-      setTransform(prev => {
-         const factor = Math.exp(-e.deltaY * 0.005);
-         const targetK = prev.k * factor;
-         const newK = Math.max(1, Math.min(targetK, 15));
-         const realFactor = newK / prev.k;
-         const r = el.getBoundingClientRect();
-         const px = e.clientX - r.left;
-         const py = e.clientY - r.top;
-         let newX = px - (px - prev.x) * realFactor;
-         let newY = py - (py - prev.y) * realFactor;
-         if (newK === 1) { newX = 0; newY = 0; }
-         return { k: newK, x: newX, y: newY };
-      });
+      const factor = Math.exp(-e.deltaY * 0.005);
+      const targetK = prev.k * factor;
+      const newK = Math.max(1, Math.min(targetK, 15));
+      const realFactor = newK / prev.k;
+      const r = el.getBoundingClientRect();
+      const px = e.clientX - r.left;
+      const py = e.clientY - r.top;
+      let newX = px - (px - prev.x) * realFactor;
+      let newY = py - (py - prev.y) * realFactor;
+      if (newK === 1) { newX = 0; newY = 0; }
+      
+      setTransform({ k: newK, x: newX, y: newY });
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
