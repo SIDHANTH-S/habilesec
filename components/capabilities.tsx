@@ -12,7 +12,7 @@ const capabilities = [
     icon: <Lock className="w-6 h-6" />,
     content: 'Transform compliance from a point-in-time audit into a continuous state. Our platform automates evidence collection, maps controls across frameworks, and provides real-time readiness scoring. Eliminate the spreadsheet burden and approach auditors with absolute certainty.',
     metrics: ['80% faster audits', 'Continuous monitoring', 'Automated evidence collection']
-  },
+  }, 
   {
     id: 'engineering',
     title: 'Security Engineering',
@@ -40,40 +40,7 @@ const capabilities = [
 ];
 
 export default function Capabilities() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const activeTab = capabilities[activeIndex].id;
-
-  // Auto-advance timing state (default 5s). When user clicks, set to 10s temporarily.
-  const [advanceMs, setAdvanceMs] = useState(5000);
-  const revertTimeoutRef = useRef<number | null>(null);
-
-  const handleNavClick = (idx: number) => {
-    setActiveIndex(idx);
-    // extend to 10s on manual interaction
-    setAdvanceMs(10000);
-    if (revertTimeoutRef.current) {
-      window.clearTimeout(revertTimeoutRef.current);
-    }
-    revertTimeoutRef.current = window.setTimeout(() => {
-      setAdvanceMs(5000);
-      revertTimeoutRef.current = null;
-    }, 10000) as unknown as number;
-  };
-
-  // Auto-advance slider using the current advanceMs. Recreate interval on advanceMs or activeIndex changes
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setActiveIndex((i) => (i + 1) % capabilities.length);
-    }, advanceMs) as unknown as number;
-    return () => window.clearInterval(id);
-  }, [advanceMs, activeIndex]);
-
-  // Cleanup any pending revert timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (revertTimeoutRef.current) window.clearTimeout(revertTimeoutRef.current);
-    };
-  }, []);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
     <section className="relative min-h-[90vh] lg:min-h-screen lg:h-screen flex flex-col justify-center py-20 lg:py-0 bg-white border-b border-outline-variant/20">
@@ -88,70 +55,153 @@ export default function Capabilities() {
           </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 lg:items-stretch lg:flex-1 lg:min-h-0">
-          {/* Navigation List */}
-          <div className="lg:w-1/3 flex flex-col gap-2">
-            {capabilities.map((cap, idx) => (
-              <button
+        {/* Fluid Card Stack Container */}
+        <div 
+          className="flex flex-col lg:flex-row gap-6 w-full lg:h-[500px] lg:flex-1 lg:min-h-0 lg:items-stretch"
+          onMouseLeave={() => setHoveredIndex(null)}
+        >
+          {capabilities.map((cap, idx) => {
+            const isActive = hoveredIndex === idx;
+
+            return (
+              <motion.div
                 key={cap.id}
-                onClick={() => handleNavClick(idx)}
-                className={`text-left p-4 cursor-pointer transition-all duration-300 border-l-[3px] rounded-none ${activeIndex === idx
-                    ? 'bg-surface border-primary'
-                    : 'bg-transparent border-transparent hover:bg-surface-container-low hover:border-outline-variant/50'
-                  }`}
+                layout
+                onMouseEnter={() => {
+                  setHoveredIndex(idx);
+                }}
+                onClick={() => {
+                  setHoveredIndex(idx);
+                }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 260,
+                  damping: 28,
+                }}
+                className={`relative overflow-hidden cursor-pointer rounded-2xl border transition-all duration-500 p-6 md:p-8 flex flex-col justify-between ${
+                  isActive
+                    ? 'flex-none h-[460px] sm:h-[380px] lg:h-full lg:flex-[3.5] bg-white border-primary shadow-xl ring-1 ring-primary/5'
+                    : 'flex-none h-[90px] lg:h-full lg:flex-[0.7] bg-surface border-outline-variant/30 hover:border-outline-variant/60 hover:bg-surface-container-low'
+                }`}
               >
-                <div className="flex items-center gap-4 mb-2">
-                  <div className={`p-2 ${activeIndex === idx ? 'text-primary' : 'text-on-surface-variant'}`}>
-                    {cap.icon}
-                  </div>
-                    <h3 className={`font-semibold ${activeIndex === idx ? 'text-primary' : 'text-on-surface-variant'}`}>
-                    {cap.title}
-                  </h3>
-                </div>
-                  <p className={`text-sm pl-14 hidden md:block ${activeIndex === idx ? 'text-on-surface-variant' : 'text-outline-variant'}`}>{cap.subtitle}</p>
-              </button>
-            ))}
-          </div>
+                <AnimatePresence mode="popLayout">
+                  {isActive ? (
+                    // Expanded State Card Content (Centered, no Icon or Index)
+                    <motion.div
+                      key="expanded"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="h-full flex flex-col justify-center items-center text-center w-full space-y-6 md:space-y-8"
+                    >
+                      <div className="space-y-4 md:space-y-6 flex flex-col items-center">
+                        {/* Title and Subtitle */}
+                        <div>
+                          <h3 className="text-2xl md:text-4xl font-display text-primary font-bold">
+                            {cap.title}
+                          </h3>
+                          <p className="text-sm md:text-base font-semibold text-secondary mt-2">
+                            {cap.subtitle}
+                          </p>
+                        </div>
 
-          {/* Content Viewer */}
-          <div className="lg:w-2/3 h-full min-h-[340px] lg:min-h-0">
-            <AnimatePresence mode="wait">
-              {capabilities.map((cap, idx) => (
-                idx === activeIndex && (
-                  <motion.div
-                    key={cap.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }}
-                    className="p-8 md:p-12 bg-white border border-outline-variant/30 shadow-md h-full flex flex-col justify-between"
-                  >
-                    <div>
-                      <h3 className="text-3xl md:text-4xl font-display text-primary mb-6">{cap.title}</h3>
-                      <p className="text-on-surface-variant leading-relaxed text-lg mb-8">
-                        {cap.content}
-                      </p>
+                        {/* Description */}
+                        <motion.p 
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: 0.08 }}
+                          className="text-on-surface-variant text-sm md:text-base leading-relaxed max-w-2xl"
+                        >
+                          {cap.content}
+                        </motion.p>
 
-                      <div className="grid sm:grid-cols-3 gap-4 mb-8">
-                        {cap.metrics.map((metric, i) => (
-                          <div key={i} className="flex flex-col gap-2 p-4 bg-surface border border-outline-variant/30">
-                            <div className="w-1.5 h-1.5 min-w-[6px] rounded-none bg-primary" />
-                            <span className="text-sm text-on-surface-variant font-mono font-medium leading-tight">{metric}</span>
-                          </div>
-                        ))}
+                        {/* Metrics Grid */}
+                        <motion.div 
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: 0.14 }}
+                          className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl justify-center"
+                        >
+                          {cap.metrics.map((metric, i) => (
+                            <div
+                              key={i}
+                              className="flex items-center justify-center gap-2 p-3 bg-surface-container-low/50 border border-outline-variant/20 rounded-xl"
+                            >
+                              <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                              <span className="text-xs text-on-surface-variant font-mono font-medium leading-tight">
+                                {metric}
+                              </span>
+                            </div>
+                          ))}
+                        </motion.div>
                       </div>
-                    </div>
 
-                    <div>
-                      <button className="flex items-center gap-2 text-primary hover:text-secondary font-bold tracking-wide uppercase text-xs transition-colors group">
-                        Explore Module <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </button>
-                    </div>
-                  </motion.div>
-                )
-              ))}
-            </AnimatePresence>
-          </div>
+                      {/* Explore CTA */}
+                      <motion.div 
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.2 }}
+                        className="pt-2"
+                      >
+                        <button className="flex items-center gap-2 text-primary hover:text-secondary font-bold tracking-wide uppercase text-xs transition-colors group">
+                          Explore Module <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                      </motion.div>
+                    </motion.div>
+                  ) : (
+                    // Collapsed State Card Content
+                    <motion.div
+                      key="collapsed"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="h-full flex lg:flex-col items-center lg:items-start justify-between w-full"
+                    >
+                      {/* Desktop Collapsed View */}
+                      <div className="hidden lg:flex flex-col items-start gap-6 w-full h-full justify-between">
+                        <div className="p-2.5 bg-transparent text-on-surface-variant/70 rounded-lg">
+                          {cap.icon}
+                        </div>
+
+                        {/* Vertical rotated title */}
+                        <div className="flex-1 flex items-center justify-center w-full py-4 overflow-hidden">
+                          <h3 className="font-display font-semibold text-lg text-primary/80 whitespace-nowrap rotate-180 [writing-mode:vertical-lr] select-none tracking-wide block">
+                            {cap.title}
+                          </h3>
+                        </div>
+
+                        <span className="font-mono text-sm font-semibold text-primary/30 w-full text-left pl-2">
+                          0{idx + 1}
+                        </span>
+                      </div>
+
+                      {/* Mobile Collapsed View */}
+                      <div className="flex lg:hidden items-center justify-between w-full h-full">
+                        <div className="flex items-center gap-4">
+                          <div className="p-2.5 bg-primary/5 text-primary rounded-xl">
+                            {cap.icon}
+                          </div>
+                          <div className="text-left">
+                            <h3 className="font-semibold text-primary text-base">
+                              {cap.title}
+                            </h3>
+                            <p className="text-xs text-on-surface-variant/70 line-clamp-1">
+                              {cap.subtitle}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="font-mono text-sm font-semibold text-primary/30">
+                          0{idx + 1}
+                        </span>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
