@@ -80,49 +80,49 @@ export default function Hero() {
   useLayoutEffect(() => {
     let ctx = gsap.context(() => {
       const tl = gsap.timeline();
-      
+
       tl.from(".hero-badge", {
         opacity: 0,
         y: 20,
         duration: 0.8,
         ease: "power3.out"
       })
-      .from(".hero-title .line", {
-        opacity: 0,
-        y: 40,
-        duration: 1,
-        stagger: 0.15,
-        ease: "power4.out"
-      }, "-=0.4")
-      .from(".hero-desc", {
-        opacity: 0,
-        y: 20,
-        duration: 0.8,
-        ease: "power3.out"
-      }, "-=0.6")
-      .from(".hero-actions", {
-        opacity: 0,
-        y: 20,
-        duration: 0.8,
-        ease: "power3.out"
-      }, "-=0.6")
-      .from(".hero-dashboard", {
-        opacity: 0,
-        scale: 0.95,
-        y: 40,
-        duration: 1.2,
-        ease: "power4.out"
-      }, "-=0.8");
+        .from(".hero-title .line", {
+          opacity: 0,
+          y: 40,
+          duration: 1,
+          stagger: 0.15,
+          ease: "power4.out"
+        }, "-=0.4")
+        .from(".hero-desc", {
+          opacity: 0,
+          y: 20,
+          duration: 0.8,
+          ease: "power3.out"
+        }, "-=0.6")
+        .from(".hero-actions", {
+          opacity: 0,
+          y: 20,
+          duration: 0.8,
+          ease: "power3.out"
+        }, "-=0.6")
+        .from(".hero-dashboard", {
+          opacity: 0,
+          scale: 0.95,
+          y: 40,
+          duration: 1.2,
+          ease: "power4.out"
+        }, "-=0.8");
 
     }, comp);
-    
+
     return () => ctx.revert();
   }, []);
 
   return (
     <section ref={comp} className="relative min-h-[90vh] lg:min-h-screen lg:h-screen flex flex-col justify-center py-20 lg:py-0 overflow-x-hidden overflow-y-visible hero-gradient border-b border-outline-variant/20">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 md:px-8 w-full flex flex-col lg:flex-row items-center gap-0 relative z-10 lg:h-full">
-        
+
         <div className="lg:w-1/2 flex flex-col items-start text-left lg:pr-6 xl:pr-10 lg:mr-4 lg:h-full lg:justify-center lg:pt-10">
           <div className="hero-badge inline-flex items-center gap-2 text-primary text-xs font-semibold tracking-widest uppercase mb-6">
             Institutional Advisory &amp; Analytics
