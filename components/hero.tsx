@@ -120,10 +120,10 @@ export default function Hero() {
   }, []);
 
   return (
-    <section ref={comp} className="relative min-h-[90vh] lg:min-h-screen lg:h-screen flex flex-col justify-center pt-24 pb-16 lg:pt-0 lg:pb-0 overflow-x-hidden overflow-y-visible hero-gradient border-b border-outline-variant/20">
+    <section ref={comp} className="relative min-h-[90vh] lg:min-h-screen lg:h-screen flex flex-col justify-center py-20 lg:py-0 overflow-x-hidden overflow-y-visible hero-gradient border-b border-outline-variant/20">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 md:px-8 w-full flex flex-col lg:flex-row items-center gap-0 relative z-10 lg:h-full">
         
-        <div className="lg:w-1/2 flex flex-col items-start text-left lg:pr-6 xl:pr-10 lg:mr-4 lg:h-ful lg:justify-center">
+        <div className="lg:w-1/2 flex flex-col items-start text-left lg:pr-6 xl:pr-10 lg:mr-4 lg:h-full lg:justify-center lg:pt-10">
           <div className="hero-badge inline-flex items-center gap-2 text-primary text-xs font-semibold tracking-widest uppercase mb-6">
             Institutional Advisory &amp; Analytics
           </div>
