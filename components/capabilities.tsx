@@ -40,20 +40,7 @@ const capabilities = [
 ];
 
 export default function Capabilities() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isHoveringStack, setIsHoveringStack] = useState(false);
-
-  // Auto-advance timing state (default 5s)
-  const [advanceMs, setAdvanceMs] = useState(5000);
-
-  // Auto-advance slider. Recreate interval on advanceMs, activeIndex, or hovering state change.
-  useEffect(() => {
-    if (isHoveringStack) return;
-    const id = window.setInterval(() => {
-      setActiveIndex((i) => (i + 1) % capabilities.length);
-    }, advanceMs) as unknown as number;
-    return () => window.clearInterval(id);
-  }, [advanceMs, activeIndex, isHoveringStack]);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
     <section className="relative min-h-[90vh] lg:min-h-screen lg:h-screen flex flex-col justify-center py-20 lg:py-0 bg-white border-b border-outline-variant/20">
@@ -71,24 +58,20 @@ export default function Capabilities() {
         {/* Fluid Card Stack Container */}
         <div 
           className="flex flex-col lg:flex-row gap-6 w-full lg:h-[500px] lg:flex-1 lg:min-h-0 lg:items-stretch"
-          onMouseEnter={() => setIsHoveringStack(true)}
-          onMouseLeave={() => setIsHoveringStack(false)}
+          onMouseLeave={() => setHoveredIndex(null)}
         >
           {capabilities.map((cap, idx) => {
-            const isActive = activeIndex === idx;
+            const isActive = hoveredIndex === idx;
 
             return (
               <motion.div
                 key={cap.id}
                 layout
-                onClick={() => {
-                  setActiveIndex(idx);
-                  // Extend auto-advance duration on manual interaction
-                  setAdvanceMs(10000);
-                  setTimeout(() => setAdvanceMs(5000), 10000);
-                }}
                 onMouseEnter={() => {
-                  setActiveIndex(idx);
+                  setHoveredIndex(idx);
+                }}
+                onClick={() => {
+                  setHoveredIndex(idx);
                 }}
                 transition={{
                   type: 'spring',
@@ -101,49 +84,49 @@ export default function Capabilities() {
                     : 'flex-none h-[90px] lg:h-full lg:flex-[0.7] bg-surface border-outline-variant/30 hover:border-outline-variant/60 hover:bg-surface-container-low'
                 }`}
               >
-                <AnimatePresence mode="wait">
+                <AnimatePresence mode="popLayout">
                   {isActive ? (
-                    // Expanded State Card Content
+                    // Expanded State Card Content (Centered, no Icon or Index)
                     <motion.div
                       key="expanded"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.3 }}
-                      className="h-full flex flex-col justify-between w-full"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="h-full flex flex-col justify-center items-center text-center w-full space-y-6 md:space-y-8"
                     >
-                      <div className="space-y-4 md:space-y-6">
-                        {/* Top Row: Icon and Index */}
-                        <div className="flex items-center justify-between">
-                          <div className="p-3 bg-primary/5 text-primary rounded-xl">
-                            {cap.icon}
-                          </div>
-                          <span className="font-mono text-sm font-semibold text-primary/40">
-                            0{idx + 1}
-                          </span>
-                        </div>
-
+                      <div className="space-y-4 md:space-y-6 flex flex-col items-center">
                         {/* Title and Subtitle */}
                         <div>
-                          <h3 className="text-2xl md:text-3xl font-display text-primary font-bold">
+                          <h3 className="text-2xl md:text-4xl font-display text-primary font-bold">
                             {cap.title}
                           </h3>
-                          <p className="text-sm font-semibold text-secondary mt-1">
+                          <p className="text-sm md:text-base font-semibold text-secondary mt-2">
                             {cap.subtitle}
                           </p>
                         </div>
 
                         {/* Description */}
-                        <p className="text-on-surface-variant text-sm md:text-base leading-relaxed max-w-xl">
+                        <motion.p 
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: 0.08 }}
+                          className="text-on-surface-variant text-sm md:text-base leading-relaxed max-w-2xl"
+                        >
                           {cap.content}
-                        </p>
+                        </motion.p>
 
                         {/* Metrics Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <motion.div 
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: 0.14 }}
+                          className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl justify-center"
+                        >
                           {cap.metrics.map((metric, i) => (
                             <div
                               key={i}
-                              className="flex items-center gap-3 p-3 bg-surface-container-low/50 border border-outline-variant/20 rounded-xl"
+                              className="flex items-center justify-center gap-2 p-3 bg-surface-container-low/50 border border-outline-variant/20 rounded-xl"
                             >
                               <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
                               <span className="text-xs text-on-surface-variant font-mono font-medium leading-tight">
@@ -151,15 +134,20 @@ export default function Capabilities() {
                               </span>
                             </div>
                           ))}
-                        </div>
+                        </motion.div>
                       </div>
 
                       {/* Explore CTA */}
-                      <div className="pt-4 lg:pt-0">
+                      <motion.div 
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.2 }}
+                        className="pt-2"
+                      >
                         <button className="flex items-center gap-2 text-primary hover:text-secondary font-bold tracking-wide uppercase text-xs transition-colors group">
                           Explore Module <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </button>
-                      </div>
+                      </motion.div>
                     </motion.div>
                   ) : (
                     // Collapsed State Card Content
@@ -179,9 +167,9 @@ export default function Capabilities() {
 
                         {/* Vertical rotated title */}
                         <div className="flex-1 flex items-center justify-center w-full py-4 overflow-hidden">
-                          <span className="font-display font-semibold text-lg text-primary/80 whitespace-nowrap rotate-180 [writing-mode:vertical-lr] select-none tracking-wide">
+                          <h3 className="font-display font-semibold text-lg text-primary/80 whitespace-nowrap rotate-180 [writing-mode:vertical-lr] select-none tracking-wide block">
                             {cap.title}
-                          </span>
+                          </h3>
                         </div>
 
                         <span className="font-mono text-sm font-semibold text-primary/30 w-full text-left pl-2">
