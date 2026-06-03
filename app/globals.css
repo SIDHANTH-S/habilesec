@@ -2,29 +2,96 @@
 @import "tw-animate-css";
 
 @theme {
-  --color-primary: #0D1B2E;
-  --color-secondary: #0058be;
-  --color-background: #F8FAFD;
-  --color-surface: #F8FAFD;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #EAF2FF;
-  --color-on-surface: #0f172a;
-  --color-on-surface-variant: #45464d;
-  --color-outline-variant: #c6c6cd;
+  /* ── Ocean Blue Theme ───────────────────────────────────────────────
+     Primary:   Deep ocean navy      #0A1628
+     Secondary: Vivid ocean blue     #0077B6
+     Accent:    Bright reef teal     #00B4D8
+     Surface:   Cool deep-sea white  #F0F6FF
+  ─────────────────────────────────────────────────────────────────── */
 
-  --font-body: var(--font-body), sans-serif;
+  /* Core palette */
+  --color-primary:                   #0A1628;   /* Deep ocean navy        */
+  --color-secondary:                 #0077B6;   /* Vivid ocean blue       */
+  --color-accent:                    #00B4D8;   /* Bright reef teal       */
+
+  /* Backgrounds */
+  --color-background:                #F0F6FF;   /* Cool sea mist          */
+  --color-surface:                   #EAF3FF;   /* Shallow water          */
+  --color-surface-container-lowest:  #FFFFFF;   /* Pure white foam        */
+  --color-surface-container-low:     #D6EEFF;   /* Light surf             */
+  --color-surface-container:         #C2E1F5;   /* Soft ocean blue        */
+
+  /* Text */
+  --color-on-surface:                #060E1D;   /* Abyss black-navy       */
+  --color-on-surface-variant:        #3A5070;   /* Mid-depth blue-grey    */
+
+  /* Borders */
+  --color-outline-variant:           #9DC4DE;   /* Calm coastal blue-grey */
+  --color-outline:                   #6A9DB8;   /* Tide line              */
+
+  /* Semantic extras */
+  --color-ocean-deep:                #023E8A;   /* Deepest blue           */
+  --color-ocean-mid:                 #0096C7;   /* Open ocean             */
+  --color-ocean-light:               #90E0EF;   /* Lagoon                 */
+  --color-foam:                      #CAF0F8;   /* Sea foam               */
+
+  /* Fonts */
+  --font-body:    var(--font-body),    sans-serif;
   --font-display: var(--font-display), serif;
-  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-mono:    var(--font-mono),    ui-monospace, SFMono-Regular, Menlo, Monaco,
+                  Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 @layer base {
   body {
     background-color: var(--color-background);
-    color: var(--color-on-surface);
-    font-family: var(--font-body);
+    color:            var(--color-on-surface);
+    font-family:      var(--font-body);
+  }
+
+  /* Scrollbar – ocean-tinted */
+  ::-webkit-scrollbar               { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track         { background: var(--color-surface); }
+  ::-webkit-scrollbar-thumb         { background: var(--color-outline); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover   { background: var(--color-secondary); }
+
+  /* Selection */
+  ::selection {
+    background-color: var(--color-ocean-light);
+    color:            var(--color-primary);
   }
 }
 
+/* ── Hero gradient: deep ocean night → shallow sea mist ────────────── */
 .hero-gradient {
-  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFD 100%);
+  background: linear-gradient(
+    180deg,
+    #FFFFFF        0%,
+    #EAF3FF       40%,
+    #D6EEFF      100%
+  );
+}
+
+/* ── Ocean glow utility ─────────────────────────────────────────────── */
+.ocean-glow {
+  box-shadow:
+    0 0 0 1px rgba(0, 119, 182, 0.15),
+    0 4px 24px  rgba(0, 119, 182, 0.12),
+    0 1px 4px   rgba(0, 119, 182, 0.08);
+}
+
+/* ── Animated shimmer for cards ─────────────────────────────────────── */
+@keyframes ocean-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+.ocean-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 180, 216, 0.10) 50%,
+    transparent 100%
+  );
+  background-size: 400px 100%;
+  animation: ocean-shimmer 2.4s ease-in-out infinite;
 }

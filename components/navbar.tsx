@@ -40,9 +40,9 @@ export default function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-4">
-          <button className="h-10 px-6 rounded-none bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm">
+          {/* <button className="h-10 px-6 rounded-none bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm">
             Engage
-          </button>
+          </button> */}
         </div>
 
         <button 
@@ -67,11 +67,11 @@ export default function Navbar() {
               <MobileNavItem label="Capabilities" />
               <MobileNavItem label="Intelligence" />
               <MobileNavItem label="Firm" />
-              <div className="border-t border-outline-variant/30 pt-4 mt-2 flex flex-col gap-4">
+              {/* <div className="border-t border-outline-variant/30 pt-4 mt-2 flex flex-col gap-4">
                 <button className="w-full h-10 rounded-none bg-primary text-white text-sm font-medium shadow-sm">
                   Engage
                 </button>
-              </div>
+              </div> */}
             </div>
           </motion.div>
         )}

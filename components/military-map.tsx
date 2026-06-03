@@ -197,7 +197,7 @@ const defaultCountries = [
   { code: "ZAF", name: "South Africa", enabled: true },
 ];
 
-export default function MilitaryMap(props) {
+export default function MilitaryMap(props: any) {
   const {
     markers = defaultMarkers,
     countries = defaultCountries,

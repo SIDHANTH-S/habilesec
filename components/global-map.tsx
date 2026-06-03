@@ -72,10 +72,7 @@ export default function GlobalMap() {
               <BrainCircuit className="text-primary w-4 h-4" />
               <span className="text-xs font-bold text-primary uppercase tracking-widest">48+ AI Frameworks</span>
             </div>
-            <div className="flex items-center gap-3 hidden lg:flex">
-              <RefreshCcw className="text-primary w-4 h-4" />
-              <span className="text-xs font-bold text-primary uppercase tracking-widest">Updated Continuously</span>
-            </div>
+            
           </div>
           
           {/* Map Visual */}
