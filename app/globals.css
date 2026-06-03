@@ -1,0 +1,30 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --color-primary: #0D1B2E;
+  --color-secondary: #0058be;
+  --color-background: #F8FAFD;
+  --color-surface: #F8FAFD;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #EAF2FF;
+  --color-on-surface: #0f172a;
+  --color-on-surface-variant: #45464d;
+  --color-outline-variant: #c6c6cd;
+
+  --font-body: var(--font-body), sans-serif;
+  --font-display: var(--font-display), serif;
+  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-on-surface);
+    font-family: var(--font-body);
+  }
+}
+
+.hero-gradient {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFD 100%);
+}
