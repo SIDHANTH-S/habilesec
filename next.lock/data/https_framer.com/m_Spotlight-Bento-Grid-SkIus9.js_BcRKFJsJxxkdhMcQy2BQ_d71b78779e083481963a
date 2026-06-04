@@ -1,0 +1,8 @@
+/*
+ * Spotlight Bento Grid
+ *
+ * Learn More: https://www.framer.com/asset-urls
+ */
+
+export * from "https://framerusercontent.com/modules/aLrlTEM0bDwYBPWz47dt/BcRKFJsJxxkdhMcQy2BQ/ltg_o7Rff.js"
+export { default } from "https://framerusercontent.com/modules/aLrlTEM0bDwYBPWz47dt/BcRKFJsJxxkdhMcQy2BQ/ltg_o7Rff.js"

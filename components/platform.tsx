@@ -4,6 +4,7 @@ import React, { useLayoutEffect, useRef } from 'react';
 import { Shield, Fingerprint, Network, Binary } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { RotatingText } from './typography';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -72,7 +73,18 @@ export default function Platform() {
             </div>
             
             <h2 className="plat-title text-4xl md:text-6xl font-display text-primary mb-6 leading-tight">
-              A command center for digital trust.
+              A command center for{' '}
+              <RotatingText
+                words={[
+                  'Digital Trust',
+                  'Continuous Compliance',
+                  'Risk Intelligence',
+                  'AI Governance',
+                  'Security Operations'
+                ]}
+                interval={3500}
+                className="text-primary"
+              />
             </h2>
             <p className="plat-desc text-lg text-on-surface-variant mb-10 leading-relaxed">
               Stop managing compliance in disconnected spreadsheets. Tanikkai OS provides a unified, programmable interface for your entire security posture, marrying expert advisory with continuous autonomous monitoring.

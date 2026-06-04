@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
+import { AnimatedTextHeading } from './typography';
 
 export default function CTA() {
   return (
@@ -11,7 +12,9 @@ export default function CTA() {
       <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
         <p className="text-xs font-bold text-white uppercase tracking-widest mb-6 opacity-80">Next Steps</p>
         <h2 className="text-5xl md:text-7xl font-display text-white mb-6">
-          Architect your trust posture.
+          <AnimatedTextHeading>
+            Architect your trust posture.
+          </AnimatedTextHeading>
         </h2>
         <p className="text-lg text-white/70 mb-10 max-w-2xl mx-auto leading-relaxed">
           Schedule an executive briefing to see how HabileSec can align your security initiatives with strategic business growth.

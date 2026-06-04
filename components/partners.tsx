@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, startTransition } from 'react';
+import React, { useState, startTransition, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { ClipPathReveal } from './typography';
 
 /* ─────────────────────────────────────────────
    Partner data
@@ -151,11 +152,32 @@ function GlassBox({ label, index }: GlassBoxProps) {
    Section
 ───────────────────────────────────────────── */
 export default function Partners() {
+  const [inView, setInView] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   // Duplicate list for seamless infinite loop
   const doubled = [...partners, ...partners];
 
   return (
-    <section className="py-14 border-y border-outline-variant/30 bg-surface overflow-x-hidden">
+    <section ref={ref} className="py-14 border-y border-outline-variant/30 bg-surface overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-6 md:px-8 flex flex-col md:flex-row items-center gap-10">
 
         {/* Label */}
@@ -164,7 +186,9 @@ export default function Partners() {
             Strategic Ecosystem
           </p>
           <p className="text-sm text-on-surface-variant mt-2">
-            Trusted by leading enterprises &amp; auditors
+            <ClipPathReveal inView={inView}>
+              Trusted by leading enterprises &amp; auditors
+            </ClipPathReveal>
           </p>
         </div>
 

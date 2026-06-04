@@ -1,13 +1,15 @@
 'use client';
 
 import React from 'react';
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import gsap from 'gsap';
 import RollingCardStack from './rolling-card-stack';
+import { RotatingHeadline, ScrollText } from './typography';
 
 export default function Hero() {
   const comp = useRef(null);
+  const [metricsInView, setMetricsInView] = useState(false);
 
   useLayoutEffect(() => {
     let ctx = gsap.context(() => {
@@ -17,7 +19,8 @@ export default function Hero() {
         .from('.hero-desc', { opacity: 0, y: 16, duration: 0.7, ease: 'power3.out' }, '-=0.5')
         .from('.hero-actions', { opacity: 0, y: 16, duration: 0.7, ease: 'power3.out' }, '-=0.5')
         .from('.hero-stat', { opacity: 0, y: 10, duration: 0.6, stagger: 0.07, ease: 'power2.out' }, '-=0.4')
-        .from('.hero-dashboard', { opacity: 0, y: 40, duration: 1.1, ease: 'power4.out' }, '-=0.9');
+        .from('.hero-dashboard', { opacity: 0, y: 40, duration: 1.1, ease: 'power4.out' }, '-=0.9')
+        .add(() => setMetricsInView(true), '-=0.8');
     }, comp);
     return () => ctx.revert();
   }, []);
@@ -68,7 +71,13 @@ export default function Hero() {
             style={{ fontSize: 'clamp(34px, 4.8vw, 60px)', letterSpacing: '-0.025em' }}
           >
             <div className="line overflow-hidden">Secure your</div>
-            <div className="line overflow-hidden">operations.</div>
+            <div className="line overflow-hidden">
+              <RotatingHeadline 
+                words={['Operations.', 'Compliance.', 'Privacy.', 'AI Governance.', 'Digital Trust.']} 
+                interval={4000}
+                className="text-[#0A1628]"
+              />
+            </div>
             <div
               className="line overflow-hidden"
               style={{
@@ -100,7 +109,7 @@ export default function Hero() {
             ].map(stat => (
               <div key={stat.label} className="hero-stat flex flex-col">
                 <span className="text-xl font-bold leading-none" style={{ color: '#0058BE' }}>
-                  {stat.value}
+                  <ScrollText value={stat.value} inView={metricsInView} />
                 </span>
                 <span className="text-[11px] text-gray-400 uppercase tracking-wider mt-1 font-semibold">
                   {stat.label}
