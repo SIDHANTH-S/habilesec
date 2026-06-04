@@ -3,6 +3,7 @@ import Navbar from '@/components/navbar';
 import Hero from '@/components/hero';
 import Partners from '@/components/partners';
 import Capabilities from '@/components/capabilities';
+import ScrollDrivenCarousel from '@/components/scroll-driven-carousel';
 import CyberFramework from '@/components/cyber-framework';
 import Platform from '@/components/platform';
 import GlobalMap from '@/components/global-map';
@@ -18,6 +19,7 @@ export default function Home() {
       <main className="bg-background min-h-screen">
         <Hero />
         <Partners />
+        <ScrollDrivenCarousel />
         <Capabilities />
         <CyberFramework />
         <Platform />

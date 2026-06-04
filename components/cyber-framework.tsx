@@ -10,8 +10,7 @@ const drawers = [
   {
     number: '01',
     title: 'Assess & Plan',
-    // original Drawer 1 color: rgb(233, 224, 255)
-    bg: 'rgb(233, 224, 255)',
+    bg: '#E8EDF5',
     panels: [
       {
         icon: BarChart,
@@ -33,8 +32,7 @@ const drawers = [
   {
     number: '02',
     title: 'Build & Secure',
-    // original Drawer 2 color: rgb(206, 189, 252)
-    bg: 'rgb(206, 189, 252)',
+    bg: '#C9D5E8',
     panels: [
       {
         icon: Construction,
@@ -56,8 +54,7 @@ const drawers = [
   {
     number: '03',
     title: 'Monitor & Respond',
-    // original Drawer 3 color: rgb(175, 146, 252)
-    bg: 'rgb(175, 146, 252)',
+    bg: '#8FA8D1',
     panels: [
       {
         icon: Activity,
@@ -79,8 +76,7 @@ const drawers = [
   {
     number: '04',
     title: 'Optimise & Scale',
-    // original Drawer 4 color: rgb(133, 90, 250)
-    bg: 'rgb(133, 90, 250)',
+    bg: '#0A1628',
     panels: [
       {
         icon: TrendingUp,
@@ -107,8 +103,8 @@ const drawers = [
 // Derive a dark text/accent colour from the bg for lighter rows,
 // and white for the darkest row (04)
 function getTextColor(bg: string) {
-  // row 04 is darkest purple → white text; rest → dark
-  return bg === 'rgb(133, 90, 250)' ? 'rgb(255,255,255)' : 'rgb(28, 28, 28)';
+  // row 04 is darkest blue → white text; rest → dark
+  return bg === '#0A1628' ? 'rgb(255,255,255)' : 'rgb(28, 28, 28)';
 }
 
 /* ------------------------------------------------------------------ */
@@ -143,7 +139,7 @@ function ExpandableDrawer({
 
   const textColor = getTextColor(drawer.bg);
   // Slightly darker tint for the left "colour strip" when open
-  const isDark = drawer.bg === 'rgb(133, 90, 250)';
+  const isDark = drawer.bg === '#0A1628';
 
   return (
     <div style={{ borderBottom: isLast ? 'none' : '1px solid rgba(0,0,0,0.10)' }}>
