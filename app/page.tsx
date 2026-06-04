@@ -4,6 +4,7 @@ import Hero from '@/components/hero';
 import Partners from '@/components/partners';
 import Capabilities from '@/components/capabilities';
 import ScrollDrivenCarousel from '@/components/scroll-driven-carousel';
+import SharedTitleBridge from '@/components/shared-title-bridge';
 import CyberFramework from '@/components/cyber-framework';
 import Platform from '@/components/platform';
 import GlobalMap from '@/components/global-map';
@@ -20,6 +21,7 @@ export default function Home() {
         <Hero />
         <Partners />
         <ScrollDrivenCarousel />
+        <SharedTitleBridge />
         <Capabilities />
         <CyberFramework />
         <Platform />

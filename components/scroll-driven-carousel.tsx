@@ -130,7 +130,8 @@ const TILT = -4;
 const P1_END = 0.27;          // scatter → orbit complete
 const P3_START = 0.73;        // orbit → collapse begins
 const P3_COLLAPSE_END = 0.88; // arc fully formed
-const P4_END = 1.0;           // title fully visible, cards gone
+const P3_TITLE_START = 0.82;  // title begins emerging
+const P4_END = 1.0;           // title rises, becomes capabilities heading
 
 // ─── FIX 4: Scatter points within visible viewport range ─────────────────────
 // Was: x: ±880, y: ±480 — far outside any viewport, user never sees them
@@ -263,22 +264,23 @@ function computeCardState(
   // Vertical y: 0 → arc y, also depth-scaled
   const morphedY = lerp(0,   arcPos.y * depthFactor, tMorph);
 
-  // Z depth: orbit z → blueprint depth
+  // Z depth: orbit z → blueprint depth (cards flatten as they become wireframes)
   const morphedZ = lerp(oz, -140, tMorph);
 
-  // Scale: gentle shrink as cards settle into crown positions
-  const morphedScale = lerp(0.88 + frontness * 0.14, 0.68, tMorph);
+  // Scale: gentle shrink as cards settle into crown positions, then further for blueprint
+  const morphedScale = lerp(0.88 + frontness * 0.14, 0.62, tMorph);
 
-  // Opacity: hold full opacity until 65% through Phase 3, then fade to
-  // a blueprint ghost at 0.08 — outlines remain, cards become structural.
-  const FADE_START   = 0.65;
-  const cardOpacity  = p3 < FADE_START
+  // Opacity: Cards become transparent blueprint outlines
+  // Early phase: maintain visibility
+  // Mid phase (0.35-0.65): hold as wireframes
+  // Late phase: fade to ghostly outlines as title emerges
+  const WIREFRAME_START = 0.35;
+  const WIREFRAME_HOLD  = 0.65;
+  const cardOpacity = p3 < WIREFRAME_START
     ? 0.35 + frontness * 0.65
-    : lerp(
-        0.35 + frontness * 0.65,
-        0.08,
-        easeInCubic((p3 - FADE_START) / (1 - FADE_START))
-      );
+    : p3 < WIREFRAME_HOLD
+    ? 0.22 // wireframe state
+    : lerp(0.22, 0.06, easeInCubic((p3 - WIREFRAME_HOLD) / (1 - WIREFRAME_HOLD)));
 
   return {
     x:          morphedX,
@@ -394,20 +396,52 @@ export default function ScrollDrivenCarousel({ className }: ComplianceOrbitProps
   const isPhase1 = progressVal <= P1_END;
   const isPhase3 = progressVal >= P3_START;
 
+  // Left panel fades during Phase 3
   const leftOpacity = isPhase1
     ? easeOutQuart(progressVal / P1_END)
     : isPhase3
-    ? 1 - easeInOutCubic((progressVal - P3_START) / (1 - P3_START))
+    ? 1 - easeInOutCubic((progressVal - P3_START) / (P3_COLLAPSE_END - P3_START))
     : 1;
 
-  // Title emerges as cards dissolve
-  const titleProgress = progressVal >= P3_START
-    ? Math.min(1, (progressVal - P3_START) / (P3_COLLAPSE_END - P3_START))
+  // Title emergence from cards — starts after wireframe collapse begins
+  const titleProgress = progressVal >= P3_TITLE_START
+    ? Math.min(1, (progressVal - P3_TITLE_START) / (P3_COLLAPSE_END - P3_TITLE_START))
     : 0;
-  const titleScale   = lerp(0.85, 1,   easeInCubic(titleProgress));
-  const titleOpacity = lerp(0,    1,   titleProgress);
-  const titleBlur    = lerp(8,    0,   titleProgress);
-  const glowOpacity  = Math.min(1, titleProgress * 2);
+  
+  // Title movement phase: stays in center then moves to top
+  const titlePhase = progressVal >= P3_COLLAPSE_END
+    ? Math.min(1, (progressVal - P3_COLLAPSE_END) / (P4_END - P3_COLLAPSE_END))
+    : 0;
+  
+  // Scale: emerge small → normal → larger as it moves
+  const titleScale = titlePhase > 0 
+    ? lerp(1.0, 1.4, easeInCubic(titlePhase))
+    : lerp(0.88, 1.0, easeInCubic(titleProgress));
+    
+  // Opacity: emerge → hold → fade as capabilities section takes over
+  const titleOpacity = titlePhase > 0.7
+    ? lerp(1, 0, (titlePhase - 0.7) / 0.3) // fade only at very end
+    : titleProgress > 0 
+    ? lerp(0, 1, titleProgress) 
+    : 0;
+    
+  const titleBlur = titlePhase > 0.7
+    ? lerp(0, 4, (titlePhase - 0.7) / 0.3)
+    : lerp(6, 0, titleProgress);
+  
+  // Glow builds as cards wireframe, peaks when title appears, then fades
+  const glowProgress = progressVal >= P3_START && progressVal < P3_COLLAPSE_END
+    ? (progressVal - P3_START) / (P3_COLLAPSE_END - P3_START)
+    : progressVal >= P3_COLLAPSE_END && progressVal < P4_END
+    ? 1 - (progressVal - P3_COLLAPSE_END) / (P4_END - P3_COLLAPSE_END)
+    : 0;
+  const glowOpacity = glowProgress * 0.75;
+  
+  // Title moves from center (50%) upward to where Capabilities heading is (~20% from top)
+  // This creates the illusion of the title traveling to become the next section's header
+  const titleVerticalPosition = titlePhase > 0
+    ? lerp(50, 15, easeInOutCubic(titlePhase)) // moves from center to top
+    : 50;
 
   // ── Variants ───────────────────────────────────────────────────────────────
   const contentVariants = {
@@ -419,6 +453,7 @@ export default function ScrollDrivenCarousel({ className }: ComplianceOrbitProps
   return (
     <section
       ref={sectionRef}
+      data-carousel-section=""
       className={`relative ${className ?? ''}`}
       style={{
         height: '420vh',
@@ -574,7 +609,14 @@ export default function ScrollDrivenCarousel({ className }: ComplianceOrbitProps
                 }}>
                   {FRAMEWORKS.map((fw, i) => {
                     const state = cardStates[i];
-                    const shadow = state.isActive
+                    
+                    // Blueprint wireframe mode when opacity is low (Phase 3 wireframe)
+                    const isWireframe = state.opacity < 0.25;
+                    
+                    const shadow = isWireframe
+                      ? `0 0 0 1px rgba(0,88,190,0.25),
+                         0 8px 32px rgba(0,88,190,0.08)`
+                      : state.isActive
                       ? `0 2px 0 rgba(255,255,255,0.8) inset,
                          0 32px 80px rgba(0,88,190,0.3),
                          0 8px 24px rgba(0,88,190,0.18),
@@ -605,9 +647,11 @@ export default function ScrollDrivenCarousel({ className }: ComplianceOrbitProps
                             ? `blur(${state.motionBlur.toFixed(2)}px)`
                             : undefined,
                           borderRadius: 16, overflow: 'hidden',
-                          background: 'rgba(255,255,255,0.93)',
-                          backdropFilter: 'blur(16px)',
-                          WebkitBackdropFilter: 'blur(16px)',
+                          background: isWireframe 
+                            ? 'rgba(255,255,255,0.02)'
+                            : 'rgba(255,255,255,0.93)',
+                          backdropFilter: isWireframe ? 'blur(0px)' : 'blur(16px)',
+                          WebkitBackdropFilter: isWireframe ? 'blur(0px)' : 'blur(16px)',
                           boxShadow: shadow,
                           display: 'flex', flexDirection: 'column',
                           alignItems: 'center', justifyContent: 'space-between',
@@ -615,16 +659,21 @@ export default function ScrollDrivenCarousel({ className }: ComplianceOrbitProps
                           willChange: 'transform, opacity, filter',
                           pointerEvents: 'none',
                           zIndex: state.isActive ? 10 : 1,
+                          border: isWireframe 
+                            ? '1.5px solid rgba(0,88,190,0.3)' 
+                            : undefined,
                         }}
                       >
-                        {/* Glass highlight */}
-                        <div style={{
-                          position: 'absolute', inset: 0, borderRadius: 16, pointerEvents: 'none',
-                          background: 'linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 50%)',
-                        }} />
+                        {/* Glass highlight - only visible when not wireframe */}
+                        {!isWireframe && (
+                          <div style={{
+                            position: 'absolute', inset: 0, borderRadius: 16, pointerEvents: 'none',
+                            background: 'linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 50%)',
+                          }} />
+                        )}
 
                         {/* Active accent stripe */}
-                        {state.isActive && (
+                        {state.isActive && !isWireframe && (
                           <div style={{
                             position: 'absolute', top: 0, left: 0, right: 0, height: 2.5,
                             background: 'linear-gradient(90deg, transparent, #0058BE, transparent)',
@@ -636,7 +685,8 @@ export default function ScrollDrivenCarousel({ className }: ComplianceOrbitProps
                         <div style={{
                           position: 'relative', zIndex: 1, fontSize: 9.5, fontWeight: 700,
                           letterSpacing: '0.13em', textTransform: 'uppercase' as const,
-                          color: '#1a2e4a', opacity: 0.45,
+                          color: isWireframe ? '#0058BE' : '#1a2e4a', 
+                          opacity: isWireframe ? 0.4 : 0.45,
                         }}>
                           {fw.label}
                         </div>
@@ -651,7 +701,9 @@ export default function ScrollDrivenCarousel({ className }: ComplianceOrbitProps
                             src={fw.src} alt={fw.alt} draggable={false}
                             style={{
                               maxWidth: '68%', maxHeight: '68%', objectFit: 'contain',
-                              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.09))',
+                              filter: isWireframe 
+                                ? 'grayscale(1) brightness(1.2) opacity(0.3)' 
+                                : 'drop-shadow(0 2px 8px rgba(0,0,0,0.09))',
                             }}
                           />
                         </div>
@@ -661,7 +713,7 @@ export default function ScrollDrivenCarousel({ className }: ComplianceOrbitProps
                           display: 'flex', flexDirection: 'column', alignItems: 'center',
                           gap: 6, position: 'relative', zIndex: 1,
                         }}>
-                          {state.isActive && (
+                          {state.isActive && !isWireframe && (
                             <svg width={160} height={24} viewBox="0 0 160 24">
                               <path d={UNDERLINE_PATHS[i]} stroke="#0058BE" strokeWidth={0.8}
                                 fill="none" opacity={0.3} />
@@ -676,7 +728,8 @@ export default function ScrollDrivenCarousel({ className }: ComplianceOrbitProps
                           )}
                           <p style={{
                             fontSize: 10, fontWeight: 700, textAlign: 'center',
-                            color: '#0b1f3a', opacity: state.isActive ? 1 : 0.5,
+                            color: isWireframe ? '#0058BE' : '#0b1f3a', 
+                            opacity: state.isActive && !isWireframe ? 1 : 0.5,
                             letterSpacing: '0.04em', transition: 'opacity 0.3s ease',
                           }}>
                             {fw.title}
@@ -691,28 +744,44 @@ export default function ScrollDrivenCarousel({ className }: ComplianceOrbitProps
                 <div style={{
                   position: 'absolute', left: '50%', top: '50%',
                   transform: 'translate(-50%, -50%)',
-                  width:  180 + titleProgress * 60,
-                  height: 180 + titleProgress * 60,
+                  width:  140 + glowProgress * 100,
+                  height: 140 + glowProgress * 100,
                   borderRadius: '50%',
-                  background: `radial-gradient(circle, rgba(0,88,190,${0.15 * glowOpacity}) 0%, transparent 70%)`,
+                  background: `radial-gradient(circle, rgba(0,88,190,${0.18 * glowOpacity}) 0%, rgba(0,88,190,${0.08 * glowOpacity}) 40%, transparent 70%)`,
                   opacity: glowOpacity,
                   pointerEvents: 'none', zIndex: 3, transition: 'none',
                 }} />
 
-                {/* Centre title — emerges from glow, Phase 3 only */}
-                <div style={{
-                  position: 'absolute', left: '50%', top: '50%',
-                  transform: `translate(-50%, -50%) scale(${titleScale})`,
-                  textAlign: 'center',
-                  opacity: titleOpacity,
-                  filter: `blur(${titleBlur}px)`,
-                  pointerEvents: 'none', zIndex: 5, transition: 'none',
-                }}>
+                {/*
+                  Centre title — the bridge (SharedTitleBridge) owns the visual
+                  rendering of this text from Phase 3 onwards. We keep the div
+                  in the DOM at opacity:0 so the bridge can read its bounding
+                  rect for accurate position mirroring.
+                */}
+                <div
+                  id="carousel-title-origin"
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    top: `${titleVerticalPosition}%`,
+                    transform: `translate(-50%, -50%) scale(${titleScale})`,
+                    textAlign: 'center',
+                    // opacity intentionally 0 — SharedTitleBridge renders the text
+                    opacity: 0,
+                    pointerEvents: 'none',
+                    zIndex: 5,
+                    transition: 'none',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
                   <p style={{
-                    fontSize: 14, fontWeight: 700, letterSpacing: '0.1em',
-                    textTransform: 'uppercase' as const, color: '#0058BE', lineHeight: 1.5,
+                    fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
+                    fontWeight: 600,
+                    letterSpacing: '-0.02em',
+                    color: '#0b1f3a',
+                    lineHeight: 1.2,
                   }}>
-                    One Integrated<br />Compliance Program
+                    Operationalize Security.
                   </p>
                 </div>
 
