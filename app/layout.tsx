@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import Preloader from '@/components/preloader';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -26,7 +27,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable} ${jetbrainsMono.variable} antialiased`}>
       <body suppressHydrationWarning className="bg-background text-on-surface font-body selection:bg-surface-container-low selection:text-primary">
-        {children}
+        <Preloader>
+          {children}
+        </Preloader>
       </body>
     </html>
   );

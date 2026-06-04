@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState , useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import gsap from 'gsap';
 import RollingCardStack from './rolling-card-stack';
@@ -10,8 +10,28 @@ import { RotatingHeadline, ScrollText } from './typography';
 export default function Hero() {
   const comp = useRef(null);
   const [metricsInView, setMetricsInView] = useState(false);
+  const [preloaderComplete, setPreloaderComplete] = useState(false);
+
+  // Listen for preloader completion
+  useEffect(() => {
+    const handlePreloaderComplete = () => setPreloaderComplete(true);
+    window.addEventListener('preloaderComplete', handlePreloaderComplete);
+    
+    // Fallback: if no event received after 2 seconds, assume preloader is done
+    const fallback = setTimeout(() => {
+      setPreloaderComplete(true);
+    }, 2000);
+
+    return () => {
+      window.removeEventListener('preloaderComplete', handlePreloaderComplete);
+      clearTimeout(fallback);
+    };
+  }, []);
 
   useLayoutEffect(() => {
+    // Only start animations after preloader is complete
+    if (!preloaderComplete) return;
+
     let ctx = gsap.context(() => {
       const tl = gsap.timeline();
       tl.from('.hero-badge', { opacity: 0, y: 16, duration: 0.7, ease: 'power3.out' })
@@ -23,7 +43,7 @@ export default function Hero() {
         .add(() => setMetricsInView(true), '-=0.8');
     }, comp);
     return () => ctx.revert();
-  }, []);
+  }, [preloaderComplete]);
 
   return (
     <section

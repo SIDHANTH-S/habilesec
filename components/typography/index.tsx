@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useAnimation, useMotionValue, useTransform, animate } from 'motion/react';
+import { motion, useAnimation, useMotionValue, useTransform, animate, useInView } from 'motion/react';
 
 // ============================================
 // RotatingHeadline - Hero Section
@@ -295,5 +295,38 @@ export function AnimatedTextHeading({ children, className = '' }: AnimatedTextHe
     >
       {children}
     </motion.span>
+  );
+}
+
+// ============================================
+// TextFlow - Astra-style text flow for navbars
+// Text elements animate smoothly from bottom and merge into header
+// ============================================
+interface TextFlowProps {
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+  duration?: number;
+  inView?: boolean;
+}
+
+export function TextFlow({ children, className = '', delay = 0, duration = 0.8, inView = true }: TextFlowProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, amount: 0.5 });
+
+  return (
+    <div ref={ref} className={`inline-block overflow-hidden ${className}`}>
+      <motion.div
+        initial={{ y: 60, opacity: 0 }}
+        animate={{ y: inView && isInView ? 0 : 60, opacity: inView && isInView ? 1 : 0 }}
+        transition={{ 
+          duration, 
+          delay,
+          ease: [0.22, 1, 0.36, 1] 
+        }}
+      >
+        {children}
+      </motion.div>
+    </div>
   );
 }

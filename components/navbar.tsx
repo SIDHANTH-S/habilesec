@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Shield, ChevronDown, Menu, X } from 'lucide-react';
 import Link from 'next/link';
+import { TextFlow } from './typography';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -26,17 +27,24 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 md:px-8 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 flex items-center justify-center p-[2px] rounded-sm bg-primary text-white group-hover:bg-secondary transition-colors duration-300">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="w-8 h-8 flex items-center justify-center p-[2px] rounded-sm bg-primary text-white group-hover:bg-secondary transition-colors duration-300"
+          >
              <Shield className="w-4 h-4" />
-          </div>
-          <span className="font-display font-medium text-xl tracking-tight text-primary">HabileSec</span>
+          </motion.div>
+          <TextFlow delay={0.3} duration={0.8} className="font-display font-medium text-xl tracking-tight text-primary">
+            HabileSec
+          </TextFlow>
         </Link>
-        
+
         <div className="hidden md:flex items-center gap-8">
-          <NavItem label="Platform" hasDropdown />
-          <NavItem label="Capabilities" hasDropdown />
-          <NavItem label="Intelligence" />
-          <NavItem label="Firm" hasDropdown />
+          <NavItem label="Platform" hasDropdown delay={0.4} />
+          <NavItem label="Capabilities" hasDropdown delay={0.5} />
+          <NavItem label="Intelligence" delay={0.6} />
+          <NavItem label="Firm" hasDropdown delay={0.7} />
         </div>
 
         <div className="hidden md:flex items-center gap-4">
@@ -80,10 +88,12 @@ export default function Navbar() {
   );
 }
 
-function NavItem({ label, hasDropdown }: { label: string; hasDropdown?: boolean }) {
+function NavItem({ label, hasDropdown, delay }: { label: string; hasDropdown?: boolean; delay?: number }) {
   return (
     <div className="flex items-center gap-1 cursor-pointer group">
-      <span className="text-sm font-medium text-on-surface-variant group-hover:text-primary transition-colors">{label}</span>
+      <TextFlow delay={delay} duration={0.6} className="text-sm font-medium text-on-surface-variant group-hover:text-primary transition-colors">
+        {label}
+      </TextFlow>
       {hasDropdown && <ChevronDown className="w-3.5 h-3.5 text-outline-variant group-hover:text-primary transition-colors" />}
     </div>
   );
